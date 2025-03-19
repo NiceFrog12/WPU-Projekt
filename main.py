@@ -21,7 +21,7 @@ help_msg = "this is a WIP"
 # Instructions for the Gemini API
 sys_instruct="Du sprichst nur Deutsch und über das Thema Nachhaltigkeit. Alle deine Antworten sollen auf Deutsch sein." 
 client = genai.configure(api_key=GOOGLE_API)
-
+used_facts = []
 
 
 @bot.message_handler(commands=['start'])
@@ -38,7 +38,9 @@ def help_command(message):
 
 @bot.message_handler(commands=["fact"])
 def send_random_fact(message):
-    response = model.generate_content(sys_instruct + '\n' + "Schreib mir ein zufälliger Fakt über Nachhaltigkeit.")
+    global used_facts
+    response = model.generate_content(sys_instruct + '\n' + f"Schreib mir ein zufälliger Fakt über Nachhaltigkeit. IF THE FACT IS ALREADY IN {used_facts} YOU CANNOT USE IT AGAIN!!")
+    used_facts += response
     #response.text is the correct thing you need to pull out
     try:
         bot.send_message(message.chat.id, response.text)
@@ -46,6 +48,6 @@ def send_random_fact(message):
         bot.send_animation(message.chat.id, "There has been an error while working through your request.")
         print(Exception)
 
-        
+
 if __name__ == "__main__":
     bot.polling(none_stop=True)
