@@ -1,11 +1,15 @@
-from google import genai # Google Gemini API
+import google.generativeai as genai # Google Gemini API
+from google.generativeai import types
 import telebot # Telegram bot API
 
 from config import BOT_TOKEN, GOOGLE_API # Misc imports
 import time
 
-client = genai.Client(api_key=GOOGLE_API)
+# Gemini API stuff
+genai.configure(api_key=GOOGLE_API)
+model = genai.GenerativeModel("gemini-1.5-flash")
 
+# Telebot stuff
 bot = telebot.TeleBot(BOT_TOKEN)
 
 
@@ -13,6 +17,12 @@ welcome_msg = "Ich bin der Bot der dir mit Nachhaltigkeit helfen soll! Falls du 
 # In my opinion it's more readable this way
 
 help_msg = "this is a WIP"
+
+# Instructions for the Gemini API
+sys_instruct="Du sprichst nur Deutsch und über das Thema Nachhaltigkeit. Alle deine Antworten sollen auf Deutsch sein." 
+client = genai.configure(api_key=GOOGLE_API)
+
+
 
 @bot.message_handler(commands=['start'])
 def handle_start(message):
@@ -26,5 +36,16 @@ def help_command(message):
     time.sleep(2)
     bot.send_message(message.chat.id, help_msg)
 
+@bot.message_handler(commands=["fact"])
+def send_random_fact(message):
+    response = model.generate_content(sys_instruct + '\n' + "Schreib mir ein zufälliger Fakt über Nachhaltigkeit.")
+    #response.text is the correct thing you need to pull out
+    try:
+        bot.send_message(message.chat.id, response.text)
+    except Exception:
+        bot.send_animation(message.chat.id, "There has been an error while working through your request.")
+        print(Exception)
+
+        
 if __name__ == "__main__":
     bot.polling(none_stop=True)
