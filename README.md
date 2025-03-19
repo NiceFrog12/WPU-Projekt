@@ -6,7 +6,7 @@ Keine Ahnung, irgendwas soll hier rein.
 
 - Alternatives Essen für dich suchen, wenn du Nachhaltiger sein willst.
 - Fakten über Nachhaltigkeit ausspucken.
-- Простое и понятное консольное приложение.
+- Helfen, um dein Alltag nachhaltiger zu machen.
 
 ## Wie schalte ich es ein?
 
