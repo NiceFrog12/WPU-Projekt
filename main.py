@@ -22,6 +22,14 @@ help_msg = "this is a WIP"
 sys_instruct="Du sprichst nur Deutsch und über das Thema Nachhaltigkeit. Alle deine Antworten sollen auf Deutsch sein." 
 client = genai.configure(api_key=GOOGLE_API)
 used_facts = []
+given_tips = []
+food_advice = []
+
+#                   IDEAS FOR THE BOT
+# 1. Make the bot discuss foods (e.g. what foods should you buy and why.) // DONE
+# 2. Let the bot give you ideas how to better your day-to-day life (make it more sustainable) // DONE
+# 3. 
+
 
 
 @bot.message_handler(commands=['start'])
@@ -36,17 +44,42 @@ def help_command(message):
     time.sleep(2)
     bot.send_message(message.chat.id, help_msg)
 
-@bot.message_handler(commands=["fact"])
+@bot.message_handler(commands=["fakt"])
 def send_random_fact(message):
     global used_facts
     response = model.generate_content(sys_instruct + '\n' + f"Schreib mir ein zufälliger Fakt über Nachhaltigkeit. IF THE FACT IS ALREADY IN {used_facts} YOU CANNOT USE IT AGAIN!!")
     used_facts += response
     #response.text is the correct thing you need to pull out
     try:
-        bot.send_message(message.chat.id, response.text)
-    except Exception:
-        bot.send_animation(message.chat.id, "There has been an error while working through your request.")
-        print(Exception)
+        bot.send_message(message.chat.id, response.text, parse_mode="Markdown")
+    except Exception as e:
+        bot.send_message(message.chat.id, "There has been an error while working through your request.")
+        print(e)
+
+
+@bot.message_handler(commands=["alltag"])
+def daily_life_tip(message):
+    global given_tips
+    response = model.generate_content(sys_instruct + "\n" + f"Schreib mir ein Weg/Tipp, wie ich mein Alltag nachhaltiger machen kann. IF THE FACT IS ALREADY IN {given_tips} YOU CANNOT USE IT AGAIN!!")
+    given_tips += response
+    try:
+        bot.send_message(message.chat.id, response.text, parse_mode="Markdown")
+    except Exception as e:
+        bot.send_message(message.chat.id, "There has been an error while working through your request.")
+        print(e)
+
+
+@bot.message_handler(commands=["essen"])
+def food_advice(message):
+    global food_advice
+    response = model.generate_content(sys_instruct + '\n' + f"Schreib mir eine Rekommendation, über was ich essen soll und warum. Begründe deine Meinung mit einfache Sprache. IF THE ADVICE IS ALREADZ IN {food_advice} YOU CANNOT USE IT AGAIN!!")
+    food_advice += response
+    try:
+        bot.send_message(message.chat.id, response.text, parse_mode="Markdown")
+    except Exception as e:
+        bot.send_message(message.chat.id, "There has been an error while working through your request.")
+        print(e)
+
 
 
 if __name__ == "__main__":
