@@ -47,10 +47,11 @@ def help_command(message):
 @bot.message_handler(commands=["fakt"])
 def send_random_fact(message):
     global used_facts
-    response = model.generate_content(sys_instruct + '\n' + f"Schreib mir ein zufälliger Fakt über Nachhaltigkeit. IF THE FACT IS ALREADY IN {used_facts} YOU CANNOT USE IT AGAIN!!")
-    used_facts += [response.text]
-    #response.text is the correct thing you need to pull out
     try:
+        response = model.generate_content(sys_instruct + '\n' + f"Schreib mir ein zufälliger Fakt über Nachhaltigkeit. IF THE FACT IS ALREADY IN {used_facts} YOU CANNOT USE IT AGAIN!!")
+        used_facts += [response.text]
+    #response.text is the correct thing you need to pull out
+    
         bot.send_message(message.chat.id, response.text, parse_mode="Markdown")
     except Exception as e:
         bot.send_message(message.chat.id, "There has been an error while working through your request.")
@@ -60,9 +61,10 @@ def send_random_fact(message):
 @bot.message_handler(commands=["alltag"])
 def daily_life_tip(message):
     global given_tips
-    response = model.generate_content(sys_instruct + "\n" + f"Schreib mir ein Weg/Tipp, wie ich mein Alltag nachhaltiger machen kann. IF THE FACT IS ALREADY IN {given_tips} YOU CANNOT USE IT AGAIN!!")
-    given_tips += [response.text]
     try:
+        response = model.generate_content(sys_instruct + "\n" + f"Schreib mir ein Weg/Tipp, wie ich mein Alltag nachhaltiger machen kann. IF THE FACT IS ALREADY IN {given_tips} YOU CANNOT USE IT AGAIN!!")
+        given_tips += [response.text]
+    
         bot.send_message(message.chat.id, response.text, parse_mode="Markdown")
     except Exception as e:
         bot.send_message(message.chat.id, "There has been an error while working through your request.")
@@ -72,9 +74,10 @@ def daily_life_tip(message):
 @bot.message_handler(commands=["essen"])
 def food_advice_command(message):
     global food_advice
-    response = model.generate_content(sys_instruct + '\n' + f"Schreib mir eine Rekommendation, über was ich essen soll und warum. Begründe deine Meinung mit einfache Sprache. IF THE ADVICE IS ALREADY IN {food_advice} YOU CANNOT USE IT AGAIN!!")
-    food_advice += [response.text]
     try:
+        response = model.generate_content(sys_instruct + '\n' + f"Schreib mir eine Rekommendation, über was ich essen soll und warum. Begründe deine Meinung mit einfache Sprache. IF THE ADVICE IS ALREADY IN {food_advice} YOU CANNOT USE IT AGAIN!!")
+        food_advice += [response.text]
+    
         bot.send_message(message.chat.id, response.text, parse_mode="Markdown")
     except Exception as e:
         bot.send_message(message.chat.id, "There has been an error while working through your request.")
