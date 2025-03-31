@@ -1,7 +1,8 @@
 import google.generativeai as genai # Google Gemini API
+from google.generativeai import types
 import telebot # Telegram bot API
-
-from config import BOT_TOKEN, GOOGLE_API # Misc imports
+from telebot import types as tele_type
+from config import BOT_TOKEN, GOOGLE_API
 import time
 
 # Gemini API stuff
@@ -52,7 +53,8 @@ def send_random_fact(message):
         response = model.generate_content(sys_instruct + '\n' + f"Schreib mir ein zufälliger Fakt über Nachhaltigkeit. IF THE FACT IS ALREADY IN {used_facts} YOU CANNOT USE IT AGAIN!!")
         used_facts += [response.text]
     #response.text is the correct thing you need to pull out
-
+        bot.send_chat_action(message.chat.id, 'typing')
+        time.sleep(2)
         bot.send_message(message.chat.id, response.text, parse_mode="Markdown")
     except Exception as e:
         bot.send_message(message.chat.id, "There has been an error while working through your request.")
@@ -66,6 +68,8 @@ def daily_life_tip(message):
         response = model.generate_content(sys_instruct + "\n" + f"Schreib mir ein Weg/Tipp, wie ich mein Alltag nachhaltiger machen kann. IF THE FACT IS ALREADY IN {given_tips} YOU CANNOT USE IT AGAIN!!")
         given_tips += [response.text]
 
+        bot.send_chat_action(message.chat.id, 'typing')
+        time.sleep(1)
         bot.send_message(message.chat.id, response.text, parse_mode="Markdown")
     except Exception as e:
         bot.send_message(message.chat.id, "There has been an error while working through your request.")
@@ -79,6 +83,8 @@ def food_advice_command(message):
         response = model.generate_content(sys_instruct + '\n' + f"Schreib mir eine Rekommendation, über was ich essen soll und warum. Begründe deine Meinung mit einfache Sprache. IF THE ADVICE IS ALREADY IN {food_advice} YOU CANNOT USE IT AGAIN!!")
         food_advice += [response.text]
 
+        bot.send_chat_action(message.chat.id, 'typing')
+        time.sleep(1)
         bot.send_message(message.chat.id, response.text, parse_mode="Markdown")
     except Exception as e:
         bot.send_message(message.chat.id, "There has been an error while working through your request.")
@@ -89,8 +95,9 @@ def recipe_advice_command(message):
     global recipes_used
     try:
         response = model.generate_content(sys_instruct + "\n" + f"Schreib mir ein kurzen und nachhaltiges Rezept, was ich zuhause kochen kann. IF THE FACT IS ALREADY IN {recipes_used} YOU CANNOT USE IT AGAIN!!")
-        recipes_used = [response.text]
-
+        recipes_used += [response.text]
+        bot.send_chat_action(message.chat.id, 'typing')
+        time.sleep(2)
         bot.send_message(message.chat.id, response.text, parse_mode="Markdown")
     except Exception as e:
         bot.send_message(message.chat.id, "There has been an error while working through your request.")
@@ -101,7 +108,7 @@ def nachhaltigkeit_news(message):
     global news_used
     try:
         response = model.generate_content(sys_instruct + "\n" + f"Schreib mir ein Neuigkeit der was mit Nachhaltigkeit zu tun hat aus moderne Zeit. Es muss irgendwas relevantes sein, die Sprache soll aber simple bleiben. IF THE NEWS ARE ALREADY IN {news_used} YOU CANNOT USE IT AGAIN!!")
-        news_used = [response]
+        news_used += [response]
 
         bot.send_chat_action(message.chat.id, 'typing')
         time.sleep(3)
@@ -129,6 +136,31 @@ def credits_command(message):
     bot.send_message(message.chat.id, credits_message)
 
 
+@bot.message_handler(commands=["tonne"])
+def trashcan_info(message):
+    markup = tele_type.InlineKeyboardMarkup(row_width=2)
+
+    versch_tonnen = [tele_type.InlineKeyboardButton("Papiermüll", callback_data="cb_papier"), tele_type.InlineKeyboardButton("Restmüll", callback_data="cb_rest"), tele_type.InlineKeyboardButton("Biomüll", callback_data="cb_bio"), tele_type.InlineKeyboardButton("Gelber Sack", callback_data="cb_sack"), tele_type.InlineKeyboardButton("Andere", callback_data="cb_andere")]
+    for item in versch_tonnen:
+        markup.add(item)
+    bot.send_message(message.chat.id, "Über welche Mülltonne willst du was herausfinden: ", reply_markup=markup)
+@bot.callback_query_handler(func=lambda call : True)
+def tonnen_query(call):
+    if call.data == "cb_rest": # keeps saying message too long
+        ans = "Hier landet alles, was in keine anderen Tonnen passt:  Speisereste (gut verpackt!), Windeln,  Staubsaugerbeutel,  Hygiene-Artikel,  verunreinigte Verpackungen, die nicht recycelbar sind etc.  Wichtig: Vermeidung durch Kompostierung und Recycling ist wünschenswert!"
+        bot.answer_callback_query(call.id, ans)
+    elif call.data == "cb_bio":
+        ans = "Biomülltonne (braun/grün):  In die Biotonne gehören alle organischen Abfälle aus Küche und Garten.  Das sind zum Beispiel Obst- und Gemüsereste, Kaffeesatz, Teebeutel (ohne Metallklammern),  Rasenschnitt,  Blumen,  Laub etc.  Kein Plastik oder sonstiger Müll darf beigemischt werden."
+        bot.answer_callback_query(call.id , ans)
+    elif call.data == "cb_sack":
+        ans = "Gelbe Tonne/Gelber Sack (gelb):  Hier werden Verpackungen aus Plastik, Metall und Verbundstoffen gesammelt.  Beispiele sind Plastikflaschen,  Konservendosen,  Alufolien,  Plastiktüten (meistens),  Tetrapaks etc.  Bitte beachten Sie die jeweiligen regionalen Vorgaben, da diese variieren können.  Oftmals müssen die Verpackungen gespült und ggf. zerkleinert werden."
+        bot.answer_callback_query(call.id, ans)
+    elif call.data == "cb_andere":
+        ans = "Es gibt regional auch noch weitere Tonnenarten, z.B. für Glas (meistens separate Container),  Sperrmüll (auf Anfrage)  oder Sondermüll (z.B. Batterien,  Leuchtmittel).  Informieren Sie sich bitte bei Ihrer Gemeinde oder Stadt über die genauen Regelungen in Ihrer Region."
+        bot.answer_callback_query(call.id, ans)
+    elif call.data == "cb_papier":
+        ans = "Papiertonne/Blaue Tonne (blau):  Hier gehören Zeitungen, Zeitschriften, Prospekte, Bücher,  Kartons (flachgedrückt),  Papiertüten etc. hinein.  Verpackungen aus Pappe oder Karton sollten möglichst sauber sein.  Kein beschichtetes Papier oder stark verschmutztes Papier."
+        bot.answer_callback_query(call.id, ans)
 
 if __name__ == "__main__":
     bot.polling(none_stop=True)
