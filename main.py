@@ -3,8 +3,6 @@ from google.generativeai import types
 import telebot # Telegram bot API
 from telebot import types as tele_type
 
-BOT_TOKEN = "6554090351:AAEgRVDFGhKeKNdfsNlj--O6pBGnLL-IaGU"
-GOOGLE_API = "AIzaSyA2fiygs--JML9eQM6P4t_-3BaovGuHuro"
 # Misc imports
 import time
 
