@@ -2,7 +2,7 @@ import google.generativeai as genai # Google Gemini API
 from google.generativeai import types
 import telebot # Telegram bot API
 from telebot import types as tele_type
-
+from config import GOOGLE_API, BOT_TOKEN
 # Misc imports
 import time
 
