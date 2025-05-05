@@ -2,7 +2,10 @@ import google.generativeai as genai # Google Gemini API
 from google.generativeai import types
 import telebot # Telegram bot API
 from telebot import types as tele_type
-from config import BOT_TOKEN, GOOGLE_API
+
+BOT_TOKEN = "6554090351:AAEgRVDFGhKeKNdfsNlj--O6pBGnLL-IaGU"
+GOOGLE_API = "AIzaSyA2fiygs--JML9eQM6P4t_-3BaovGuHuro"
+# Misc imports
 import time
 
 # Gemini API stuff
@@ -13,11 +16,19 @@ model = genai.GenerativeModel("gemini-1.5-flash")
 bot = telebot.TeleBot(BOT_TOKEN, parse_mode="Markdown")
 
 
-welcome_msg = "*Hallo ich bin Nicebot12_*\nIch bin dafür da dein *Leben einfacher zu machen*. Zwar kann ich nicht kochen, *aber ich kann dir aber bei vielen anderen Sachen helfen*.\nMit `/help` siehst du alle meine Funktionen. Ich hoffe, dass ich dir helfen kann, ein umweltfreundliches und freundliches Leben zu führen."
+welcome_msg = "*Hallo ich bin Nicebot12_*\n\nIch bin dafür da dein *Leben einfacher zu machen*. Zwar kann ich nicht kochen, *aber ich kann dir aber bei vielen anderen Sachen helfen*.\n\nMit `/help` siehst du alle meine Funktionen. Ich hoffe, dass ich dir helfen kann, ein umweltfreundliches und freundliches Leben zu führen."
+
+lambda_message = "Du brauchst Hilfe, kein Problem mit `/start` schaltest du mich ein ^^.\n\nMit `/help` kannst du mich nach hilfe bitten welches commands ich habe 🙂"
 
 # In my opinion it's more readable this way
 
-help_msg = "/start\n/help\n/essen\n/alltag\n/fakt\n/rezept"
+help_msg = """
+`/fakt` erzähle ich dir einen lustigen Fakt über den aktuellen Stand der Dinge. Nartüllich hat es was mit umwellt zutun.
+
+Mit `/rezept` gebe ich dir ein Rezept was du nachkochen kannst, aber vertrau nicht auf meine Tipps, denn ich esse ja nicht 😉
+
+`/essen` kann ich dir helfen was man essen könnte, was gesund aber auch schmeckt und auch auf regionale basis ist
+"""
 
 # Instructions for the Gemini API
 sys_instruct="Du sprichst nur Deutsch und über das Thema Nachhaltigkeit. Alle deine Antworten sollen auf Deutsch sein. Du kannst simple Form von Markdown nutzen, aber nur in die Form was Telegram Markdown supportet. Als Beispiel, das ist *Bold* und das ist __italicized__"
@@ -39,7 +50,7 @@ def handle_start(message):
 def help_command(message):
     bot.send_chat_action(message.chat.id, 'typing')
     time.sleep(2)
-    bot.send_message(message.chat.id, help_msg ,parse_mode="HTML")
+    bot.send_message(message.chat.id, help_msg ,parse_mode="Markdown")
 
 @bot.message_handler(commands=["test"])
 def testingcommand(message):
@@ -136,6 +147,21 @@ def credits_command(message):
     bot.send_message(message.chat.id, credits_message)
 
 
+ideas = []
+@bot.message_handler(commands=["idea"])
+def pick_trasfds(message):
+    global ideas
+    try:
+        response = model.generate_content(sys_instruct + f"generiere mir eine simple beschreibung von jede Mülltonnenart die da gibts.make every message at most 64 bytes long but keep the explanations detailed. The categories you need to explain are: Papiermüll, Restmüll")
+        ideas = [response.text]
+        bot.send_chat_action(message.chat.id, 'typing')
+        time.sleep(0)
+        bot.send_message(message.chat.id, response.text, parse_mode="Markdown")
+    except Exception as e:
+        bot.send_message(message.chat.id, "There has been an error while working through your request.")
+        print(e)
+
+
 @bot.message_handler(commands=["tonne"])
 def trashcan_info(message):
     markup = tele_type.InlineKeyboardMarkup(row_width=2)
@@ -146,21 +172,26 @@ def trashcan_info(message):
     bot.send_message(message.chat.id, "Über welche Mülltonne willst du was herausfinden: ", reply_markup=markup)
 @bot.callback_query_handler(func=lambda call : True)
 def tonnen_query(call):
+    bot.answer_callback_query(call.id , "Here is some information: ") # CHANGE THIS INTO GERMAN
     if call.data == "cb_rest": # keeps saying message too long
         ans = "Hier landet alles, was in keine anderen Tonnen passt:  Speisereste (gut verpackt!), Windeln,  Staubsaugerbeutel,  Hygiene-Artikel,  verunreinigte Verpackungen, die nicht recycelbar sind etc.  Wichtig: Vermeidung durch Kompostierung und Recycling ist wünschenswert!"
-        bot.answer_callback_query(call.id, ans)
+        bot.send_message(call.message.chat.id, ans)
     elif call.data == "cb_bio":
         ans = "Biomülltonne (braun/grün):  In die Biotonne gehören alle organischen Abfälle aus Küche und Garten.  Das sind zum Beispiel Obst- und Gemüsereste, Kaffeesatz, Teebeutel (ohne Metallklammern),  Rasenschnitt,  Blumen,  Laub etc.  Kein Plastik oder sonstiger Müll darf beigemischt werden."
-        bot.answer_callback_query(call.id , ans)
+        bot.send_message(call.message.chat.id, ans)
     elif call.data == "cb_sack":
         ans = "Gelbe Tonne/Gelber Sack (gelb):  Hier werden Verpackungen aus Plastik, Metall und Verbundstoffen gesammelt.  Beispiele sind Plastikflaschen,  Konservendosen,  Alufolien,  Plastiktüten (meistens),  Tetrapaks etc.  Bitte beachten Sie die jeweiligen regionalen Vorgaben, da diese variieren können.  Oftmals müssen die Verpackungen gespült und ggf. zerkleinert werden."
-        bot.answer_callback_query(call.id, ans)
+        bot.send_message(call.message.chat.id, ans)
     elif call.data == "cb_andere":
         ans = "Es gibt regional auch noch weitere Tonnenarten, z.B. für Glas (meistens separate Container),  Sperrmüll (auf Anfrage)  oder Sondermüll (z.B. Batterien,  Leuchtmittel).  Informieren Sie sich bitte bei Ihrer Gemeinde oder Stadt über die genauen Regelungen in Ihrer Region."
-        bot.answer_callback_query(call.id, ans)
+        bot.send_message(call.message.chat.id, ans)
     elif call.data == "cb_papier":
         ans = "Papiertonne/Blaue Tonne (blau):  Hier gehören Zeitungen, Zeitschriften, Prospekte, Bücher,  Kartons (flachgedrückt),  Papiertüten etc. hinein.  Verpackungen aus Pappe oder Karton sollten möglichst sauber sein.  Kein beschichtetes Papier oder stark verschmutztes Papier."
-        bot.answer_callback_query(call.id, ans)
+        bot.send_message(call.message.chat.id, ans)
+
+@bot.message_handler(func=lambda message: True)
+def sift_every_message(message):
+    bot.reply_to(message, lambda_message)
 
 if __name__ == "__main__":
     bot.polling(none_stop=True)
