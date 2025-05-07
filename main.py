@@ -16,16 +16,27 @@ bot = telebot.TeleBot(BOT_TOKEN, parse_mode="Markdown")
 
 welcome_msg = "*Hallo ich bin Nicebot12_*\n\nIch bin dafür da dein *Leben einfacher zu machen*. Zwar kann ich nicht kochen, *aber ich kann dir aber bei vielen anderen Sachen helfen*.\n\nMit `/help` siehst du alle meine Funktionen. Ich hoffe, dass ich dir helfen kann, ein umweltfreundliches und freundliches Leben zu führen."
 
-lambda_message = "Du brauchst Hilfe, kein Problem mit `/start` schaltest du mich ein ^^.\n\nMit `/help` kannst du mich nach hilfe bitten welches commands ich habe 🙂"
+lambda_message = "Du brauchst Hilfe? Kein Problem, mit `/start` schaltest du mich ein ^^.\n\nMit `/help` kannst du mich nach Hilfe bitten, welches Commands ich habe 🙂"
 
 # In my opinion it's more readable this way
 
 help_msg = """
+`/alltag` Hier kannst du Informationen bekommen, die dir helfen können, deinen Alltag nachhaltiger zu machen.
+
+
 `/fakt` erzähle ich dir einen lustigen Fakt über den aktuellen Stand der Dinge. Nartüllich hat es was mit umwellt zutun.
 
 Mit `/rezept` gebe ich dir ein Rezept was du nachkochen kannst, aber vertrau nicht auf meine Tipps, denn ich esse ja nicht 😉
 
 `/essen` kann ich dir helfen was man essen könnte, was gesund aber auch schmeckt und auch auf regionale basis ist
+
+`/tonne`  Diese Command erzählt dir über verschiedene Mülltonnen, die es in Deutschland gibt. Es spricht etwa über jede Tonne und erklärt, welcher Müll da drin gehört.
+
+`/item <Sache>`  hilft dir mithilfe von ein KI den Müll in eine der Mülltonnen einzuordnen, sodass du Müll ohne Probleme sortieren könntest.  Das hilft dir, wenn du unsicher bist, wo dein Müllstück gehört.
+
+`/news` zeigt dir die neuesten Neuigkeiten über Nachhaltigkeit, die unsere KI finden kann! Wichtige Informationen bitte selber überprüfen, denn KI kann Fehler machen.
+
+`/credits` ist eine kleine Command die ein bisschen über die Entwicklern dieser Bots spricht 😜
 """
 
 # Instructions for the Gemini API
@@ -50,10 +61,6 @@ def help_command(message):
     time.sleep(2)
     bot.send_message(message.chat.id, help_msg ,parse_mode="Markdown")
 
-@bot.message_handler(commands=["test"])
-def testingcommand(message):
-    bot.send_message(message.chat.id, "this is *bold* or *italicized.* another try of __bold__ or _italicized_",parse_mode="Markdown")
-# ´JUST USE MARKDOWN: IT IS NOT WORTH FIGURING OUT MDV2
 
 @bot.message_handler(commands=["fakt"])
 def send_random_fact(message):
@@ -145,21 +152,6 @@ def credits_command(message):
     bot.send_message(message.chat.id, credits_message)
 
 
-ideas = []
-@bot.message_handler(commands=["idea"])
-def pick_trasfds(message):
-    global ideas
-    try:
-        response = model.generate_content(sys_instruct + f"generiere mir eine simple beschreibung von jede Mülltonnenart die da gibts.make every message at most 64 bytes long but keep the explanations detailed. The categories you need to explain are: Papiermüll, Restmüll")
-        ideas = [response.text]
-        bot.send_chat_action(message.chat.id, 'typing')
-        time.sleep(0)
-        bot.send_message(message.chat.id, response.text, parse_mode="Markdown")
-    except Exception as e:
-        bot.send_message(message.chat.id, "There has been an error while working through your request.")
-        print(e)
-
-
 @bot.message_handler(commands=["tonne"])
 def trashcan_info(message):
     markup = tele_type.InlineKeyboardMarkup(row_width=2)
@@ -168,10 +160,12 @@ def trashcan_info(message):
     for item in versch_tonnen:
         markup.add(item)
     bot.send_message(message.chat.id, "Über welche Mülltonne willst du was herausfinden: ", reply_markup=markup)
+
+
 @bot.callback_query_handler(func=lambda call : True)
 def tonnen_query(call):
-    bot.answer_callback_query(call.id , "Here is some information: ") # CHANGE THIS INTO GERMAN
-    if call.data == "cb_rest": # keeps saying message too long
+    bot.answer_callback_query(call.id , "Hier sind paar Informationen: ")
+    if call.data == "cb_rest":
         ans = "Hier landet alles, was in keine anderen Tonnen passt:  Speisereste (gut verpackt!), Windeln,  Staubsaugerbeutel,  Hygiene-Artikel,  verunreinigte Verpackungen, die nicht recycelbar sind etc.  Wichtig: Vermeidung durch Kompostierung und Recycling ist wünschenswert!"
         bot.send_message(call.message.chat.id, ans)
     elif call.data == "cb_bio":
