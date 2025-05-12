@@ -2,7 +2,9 @@ import google.generativeai as genai # Google Gemini API
 from google.generativeai import types
 import telebot # Telegram bot API
 from telebot import types as tele_type
-from config import GOOGLE_API, BOT_TOKEN
+
+BOT_TOKEN = "telegram_token"
+GOOGLE_API = "gemini_token"
 # Misc imports
 import time
 
@@ -32,9 +34,9 @@ Mit `/rezept` gebe ich dir ein Rezept was du nachkochen kannst, aber vertrau nic
 
 `/tonne`  Diese Command erzählt dir über verschiedene Mülltonnen, die es in Deutschland gibt. Es spricht etwa über jede Tonne und erklärt, welcher Müll da drin gehört.
 
-`/item <Sache>`  hilft dir mithilfe von ein KI den Müll in eine der Mülltonnen einzuordnen, sodass du Müll ohne Probleme sortieren könntest.  Das hilft dir, wenn du unsicher bist, wo dein Müllstück gehört.
+`/item <Sache>`  hilft dir mit einer KI den Müll in einer der Mülltonnen einzuordnen, sodass du den Müll ohne Probleme sortieren kannst.  Das hilft dir, wenn du unsicher bist, wo dein Müll hingehört.
 
-`/news` zeigt dir die neuesten Neuigkeiten über Nachhaltigkeit, die unsere KI finden kann! Wichtige Informationen bitte selber überprüfen, denn KI kann Fehler machen.
+`/news` damit zeigt der Bot dir an, was in der Welt gerade so passiert. *Wichtig*: Die KI könnte *fehlerhaft* sein und nicht 100% richtige Information zeigen!!!
 
 `/credits` ist eine kleine Command die ein bisschen über die Entwicklern dieser Bots spricht 😜
 """
