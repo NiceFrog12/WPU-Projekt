@@ -32,7 +32,8 @@ Der Token sieht normalerweise so aus:
 
 Das ist auch sehr Easy. Geh auf dem Google website fürs Gemini API <a href="https://aistudio.google.com/apikey">hier</a> und klick auf "Create API Key". Dann kannst du es einfach kopieren.<br>
 Du würdest auch das Library für Python installieren, sodass Gemini funktionieren kann. Kopiere einfach diese Command ins Konsole:
-´´´bash
+
+´´´
 pip install google-genai
 ´´´
 
